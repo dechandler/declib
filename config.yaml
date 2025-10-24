@@ -1,0 +1,6 @@
+---
+# log_path: ~/.config/example-app/example-app.log
+log_path: /dev/null
+
+# log_level: INFO
+# stderr_log_level: WARNING
