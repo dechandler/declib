@@ -27,7 +27,7 @@ class ExampleConfig(DeclibConfig):
         }
         path_opts = ['place']
 
-        super().__init__("the-thing", extra_defaults, path_opts)
+        super().__init__("declib-example", extra_defaults, path_opts)
 
 
 class ExampleCli(DeclibCli):
@@ -43,7 +43,7 @@ class ExampleCli(DeclibCli):
             'run': {
                 'aliases': ['r'],
                 'handler': lambda: ExampleRunCli(self.config).handle_args,
-                'help': "Run the thing"
+                'help': "Run something in a submenu"
             },
             'dump-config': {
                 'aliases': ['d', 'dump', 'dump_config'],
@@ -54,7 +54,7 @@ class ExampleCli(DeclibCli):
 
     def dump_config(self, args):
 
-        print({**self.config})
+        print(json.dumps({**self.config}, indent=4))
 
 
 class ExampleRunCli(DeclibCli):
