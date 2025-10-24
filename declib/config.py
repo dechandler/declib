@@ -30,7 +30,7 @@ class DeclibConfig:
         # TODO: generic interface for merging special config structures
 
         # Merge general config and set merged loggers value
-        self.config.update(self.config_file_data)
+        self.config.update(self.config_file_data or {})
 
         self._expand_paths()
 
@@ -197,4 +197,3 @@ class DeclibConfig:
 
         for opt in self.path_opts:
             self.config[opt] = resolve_path(self.config[opt], self.config_dir)
-
