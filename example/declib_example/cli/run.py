@@ -52,26 +52,49 @@ class ExampleRunCli(DeclibCli):
 
     def demo_run_command(self, args):
 
+        # To keep the CLI a dumb execution path layer, the API
+        #   handles backend actions
         api = ExampleApi(self.config)
-        api.demo_run_command()
+
+        # DeclibApi provides a .run_command() method that returns and
+        # optionally prints or logs the command's stdout and stdin (all on
+        # by default)
+        stdout, stderr = api.run_command(['ss', '-plnt'])
+
 
     def demo_silent(self, args):
 
+        # DeclibApi also returns stdout and stderr, so you can turn off
+        # default outputs
         api = ExampleApi(self.config)
-        api.demo_silent()
+        stdout, stderr = api.run_command(
+            ['cat', '/etc/issue'],
+            print_stdout=False, log_stdout=False,
+            print_stderr=False, log_stderr=False
+        )
+        print("Command complete")
+        print("Stdout lines:")
+        print(stdout)
+        print("Stderr lines:")
+        print(stderr)
 
 
     def demo_cwd(self, args):
 
+        # Specify working directory for a command
         api = ExampleApi(self.config)
-        api.demo_cwd("/dev/shm")
+        api.run_command(['pwd'], cwd="/dev/shm")
+
 
     def demo_stdin(self, args):
 
+        # To pipe something into stdin
         api = ExampleApi(self.config)
-        api.demo_stdin('\n'.join([
-            "Stuff and Things.",
-            "Spam & Eggs.",
-            "Grr. Arg."
-        ]))
-
+        api.run_command(
+            ['grep', 'a'],
+            stdin='\n'.join([
+                "Stuff and Things.",
+                "Spam & Eggs.",
+                "Grr. Arg."
+            ])
+        )
