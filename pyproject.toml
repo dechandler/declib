@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=77.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "declib"
+version = "0.0.1"
+authors = [
+    { name="David Chandler", email="contact@dechandler.io" }
+]
+description = "Simple framework for CLI applications"
+readme = "README.md"
+
+license = "BSD-2-Clause"
+license-files = ["LICENSE"]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 3 - Alpha",
+    "Topic :: Software Development :: Libraries :: Application Frameworks"
+]
+
+requires-python = ">3.8"
+
+dependencies = [
+    "pyyaml"
+]
+
+
+[project.urls]
+"Code" = "https://github.com/dechandler/declib"
+"Documentation" = "https://github.com/dechandler/declib/README.md"
+
+
+[tool.setuptools]
+packages = ["declib"]
