@@ -2,7 +2,6 @@
 
 
 """
-import logging
 import os
 import sys
 
@@ -13,9 +12,6 @@ sys.path.append(declib_src_dir) if declib_src_dir not in sys.path else None
 from declib import DeclibApi
 
 
-log = logging.getLogger("declib-example")
-
-
 class ExampleApi(DeclibApi):
     """
     DeclibApi objects are what provide the interface to underlying functionality
@@ -24,8 +20,6 @@ class ExampleApi(DeclibApi):
     with interfaces other than the cli
 
     """
-
-
     def __init__(self, config):
 
         super().__init__(config)

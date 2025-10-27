@@ -2,7 +2,6 @@
 
 """
 import json
-import logging
 import os
 import sys
 
@@ -13,9 +12,6 @@ sys.path.append(declib_src_dir) if declib_src_dir not in sys.path else None
 from declib import DeclibCli
 
 from .run import ExampleRunCli
-
-
-log = logging.getLogger("declib-example")
 
 
 class ExampleCli(DeclibCli):

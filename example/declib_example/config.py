@@ -2,7 +2,6 @@
 
 
 """
-import logging
 import os
 import sys
 
@@ -13,20 +12,16 @@ sys.path.append(declib_src_dir) if declib_src_dir not in sys.path else None
 from declib import DeclibConfig
 
 
-log = logging.getLogger("declib-example")
-
-
 class ExampleConfig(DeclibConfig):
     """
-    The config object sets defaults, loads a config file, and
-    configures logging.
+    The config object sets defaults and loads a config file
 
     It then gets passed into other objects' __init__s, though
     in most of those cases, a dictionary with needed config
     options will suffice
 
     """
-    def __init__(self):
+    def __init__(self, log):
 
         # These are defaults for config options the app is adding
         extra_defaults = {
@@ -40,4 +35,4 @@ class ExampleConfig(DeclibConfig):
         path_opts = ['place']
 
         # Invoke DeclibConfig.__init__() with the prepared values 
-        super().__init__("declib-example", extra_defaults, path_opts)
+        super().__init__(log, "declib-example", extra_defaults, path_opts)

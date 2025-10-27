@@ -9,141 +9,43 @@ import yaml
 log = logging.getLogger("declib")
 
 
-class DeclibConfig:
+class DeclibConfig(dict):
 
-    def __init__(self, app_name, extra_defaults, path_opts):
+    def __init__(self, log, app_name, extra_defaults, path_opts):
 
+        super().__init__()
+
+        self.log = log
         self.name = app_name
         self.extra_defaults = extra_defaults
         self.path_opts = path_opts
-
-        self._pre_log = []
-        self.log = self.pre_log
-        self.log('debug', f"Starting {self.name}")
 
         self.path, self.config_file_data = self._get_config_file_data()
         self.config_dir = os.path.dirname(self.path)
 
         # Get config defaults
-        self.config = self.get_defaults()
+        self.update(self.get_defaults())
 
         # TODO: generic interface for merging special config structures
 
         # Merge general config and set merged loggers value
-        self.config.update(self.config_file_data or {})
+        self.update(self.config_file_data or {})
 
         self._expand_paths()
 
-        self.configure_loggers()
+        self.log.configure_loggers(self)
 
-
-
-    def configure_loggers(self):
-
-        # Configure root logger for stderr output
-        rootLogger = logging.getLogger()
-        rootLogger.setLevel(
-            getattr(logging, self.config['stderr_log_level'].upper())
-        )
-        handler = logging.StreamHandler(stream=sys.stderr)
-        handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
-        rootLogger.addHandler(handler)
-
-        # Configure app file log
-        appLogger = logging.getLogger(self.name)
-        appLogger.setLevel(
-            getattr(logging, self.config['log_level'].upper())
-        )
-        os.makedirs(os.path.dirname(self.config['log_path']), exist_ok=True)
-
-        handler = logging.FileHandler(self.config['log_path'])
-        msgfmt = "%(asctime)s (%(process)d) %(levelname)-7s: %(message)s"
-        datefmt = "%Y-%m-%d_%H:%M:%S"
-        handler.setFormatter(logging.Formatter(msgfmt, datefmt=datefmt))
-        appLogger.addHandler(handler)
-
-        # Connect declib logging to file log and flush saved entries
-        log.addHandler(handler)
-        self.log = self.full_log
-        self.flush_pre_log()
-
-        self.stderr_logger = rootLogger
-        self.file_logger = appLogger
-
-
-    def pre_log(self, level, message):
-        """
-        Since this object is created and begins generating logs
-        before logging is configured, stash log messages for
-        later replay into the correct log
-
-        """
-        # Prepend timestamp to message, since this will be replayed later
-        message = f"{datetime.datetime.now().strftime("%H:%M:%S")} {message}"
-
-        self._pre_log.append((level, message))
-
-    def full_log(self, level, message):
-        """
-        This is a passthrough method to fit the pre_log interface
-        but write directly to the log, so that the log interface
-        can be consistent in this class
-
-        """
-        log.log(logging.__dict__[level.upper()], message)
-
-    def flush_pre_log(self):
-
-        # Refuse to flush if log has not been configured
-        if self.log is self.pre_log:
-            return
-
-        # Empty self._pre_log into the updated log method
-        for level, message in self._pre_log:
-            self.log(level, message)
-        self._pre_log = []
-
-
-    def __getitem__(self, key):
-        return self.config[key]
-
-    def get(self, key, default):
-        return self.config.get(key, default)
-
-
-    def items(self):
-        return self.config.items()
-
-    def keys(self):
-        return self.config.keys()
-
-    def values(self):
-        return self.config.values()
-
-
-    def __setitem__(self, key, value):
-        self.config[key] = value
-
-    def update(self, update_data):
-        self.config.update(update_data)
-
-    def __delitem__(self, key):
-        try:
-            del self.config[key]
-        except KeyError:
-            pass
 
     def _get_config_file_data(self):
         """
         The priority order is:
-            Environment variable: SYSTOGONY_CONFIG (~ accepted)
-            $HOME/.config/systogony/config.yaml
+            Environment variable: APP_NAME_CONFIG (~ accepted)
+            $HOME/.config/app-name/config.yaml
 
         """
         search_paths = [
             os.environ.get(f"{self.name.upper().replace('-', '_')}_CONFIG", ""),
-            f"~/.config/{self.name}/config.yaml",
-            os.path.join(os.path.dirname(os.path.abspath(sys.argv[1])), "config.yaml")
+            f"~/.config/{self.name}/config.yaml"
         ]
         for path_var in search_paths:
             path = os.path.expanduser(path_var)
@@ -196,4 +98,4 @@ class DeclibConfig:
             return path
 
         for opt in self.path_opts:
-            self.config[opt] = resolve_path(self.config[opt], self.config_dir)
+            self[opt] = resolve_path(self[opt], self.config_dir)

@@ -1,17 +1,14 @@
 
-import logging
-
-log = logging.getLogger('declib')
-
-
 
 class DeclibCli:
 
     def __init__(self, config):
 
-        log.debug(f"Initializing {str(self.__class__)}")
 
         self.config = config
+        self.log = config.log
+
+        self.log.debug(f"Initializing {str(self.__class__)}")
 
         self.operations = {}
 
@@ -43,14 +40,14 @@ class DeclibCli:
                     'name': name,
                     'handler': op['handler']
                 }
-        log.debug(f"Operation aliases:")
+        self.log.debug(f"Operation aliases:")
         for alias, operation in _operations.items():
-            log.debug(f"    {alias}: {operation['name']}")
+            self.log.debug(f"    {alias}: {operation['name']}")
 
         # If there are no arguments, use no_args_operation
         if not args:
-            log.debug("No further arguments")
-            log.debug(f"Defaulting to {self.no_args_operation}")
+            self.log.debug("No further arguments")
+            self.log.debug(f"Defaulting to {self.no_args_operation}")
             args = [self.no_args_operation]
 
         # Context-specific checks on arg progression
@@ -60,15 +57,15 @@ class DeclibCli:
             # If first arg matches no op_names or aliases,
             # use no_matching_args_operation
             if args[0] not in _operations:
-                log.debug(f"Next arg exists but is not a valid operaion: {args[0]}")
-                log.debug(f"Defaulting to {self.no_matching_args_operation}")
+                self.log.debug(f"Next arg exists but is not a valid operaion: {args[0]}")
+                self.log.debug(f"Defaulting to {self.no_matching_args_operation}")
                 args.insert(0, self.no_matching_args_operation)
 
             # Remove operation from args and identify handler
             operation = _operations[args.pop(0)]
             op_name, handler = operation['name'], operation['handler']
 
-        log.debug(f"Running {str(self.__class__)} -> {op_name} with args: {args})")
+        self.log.debug(f"Running {str(self.__class__)} -> {op_name} with args: {args})")
 
         # Run lambda handlers to initialize the object
         # and get the .handle_args() method 

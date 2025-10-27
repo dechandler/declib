@@ -85,8 +85,8 @@ class DeclibApi:
             line = line.decode().rstrip()
 
             if to_log:
-                self.config.stderr_logger.debug(line)
-            if to_screen and self.config.stderr_logger.level > 15:
+                self.config.log.err.debug(line)
+            if to_screen and self.config.log.err.level > 15:
                 print(line)
 
             stream_output.append(ANSI_ESCAPE.sub('', line))
