@@ -102,5 +102,5 @@ class DeepAddressableDictlike:
             if type(value) is not dict:
                 subitems.append([dict_path, value])
                 continue
-            subitems.extend(_deep_items(value, dict_path))
+            subitems.extend(self._deep_items(value, dict_path))
         return subitems
