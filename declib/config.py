@@ -11,12 +11,12 @@ log = logging.getLogger("declib")
 
 class DeclibConfig(dict):
 
-    def __init__(self, log, app_name, extra_defaults, path_opts):
+    def __init__(self, log, extra_defaults, path_opts):
 
         super().__init__()
 
         self.log = log
-        self.name = app_name
+        self.name = log.name
         self.extra_defaults = extra_defaults
         self.path_opts = path_opts
 
