@@ -29,6 +29,19 @@ class DeclibApi:
         """
         Utility method for running OS commands
 
+        Args:
+            cmd (list):
+            cwd (str OR os.PathLike, optional):
+            stdin (str, optional):
+            print_stdout (bool, optional):
+            log_stdout (bool, optional):
+            print_stderr (bool, optional):
+            log_stderr (bool, optional):
+
+        Returns:
+            stdout (list): stdout lines from running command
+            stderr (list): stderr lines from running command
+
         """
         cwd = cwd or os.getcwd()
 
