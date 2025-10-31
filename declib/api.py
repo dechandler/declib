@@ -1,7 +1,6 @@
 """
 
 """
-import logging
 import os
 import re
 import sys
@@ -11,14 +10,13 @@ from subprocess import Popen, PIPE
 
 ANSI_ESCAPE = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
 
-log = logging.getLogger('declib')
-
 
 class DeclibApi:
 
     def __init__(self, config):
 
         self.config = config
+        self.log = config.log
 
     def run_command(self,
             cmd, cwd='',
@@ -45,7 +43,7 @@ class DeclibApi:
         """
         cwd = cwd or os.getcwd()
 
-        log.info(' '.join([
+        self.log.info(' '.join([
             "Running command from", cwd,
             f"with{'' if stdin else 'out'} stdin:",
             ' '.join(cmd)
@@ -98,8 +96,8 @@ class DeclibApi:
             line = line.decode().rstrip()
 
             if to_log:
-                self.config.log.err.debug(line)
-            if to_screen and self.config.log.err.level > 15:
+                self.log.err.debug(line)
+            if to_screen and self.log.err.level > 15:
                 print(line)
 
             stream_output.append(ANSI_ESCAPE.sub('', line))
