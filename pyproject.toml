@@ -33,4 +33,4 @@ dependencies = [
 
 
 [tool.setuptools]
-packages = ["declib"]
+packages = ["declib", "declib.utils"]
