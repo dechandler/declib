@@ -17,6 +17,8 @@ class DeclibApi:
 
         self.config = config
         self.log = config.log
+        self.err = config.log.err
+        self.name = config.name
 
     def run_command(self,
             cmd, cwd='',
