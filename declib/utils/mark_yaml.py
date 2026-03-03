@@ -16,15 +16,20 @@ class MarkYamlDataLoader:
     Load data from a MarkYaml file
 
     `data = MarkYamlDataLoader(data_path).data`
+    
+    Alternately, a list of lines can be provided:
+    `data = MarkYamlDataLoader(data_lines=[]).data`
 
     Args:
         data_path (str OR os.PathLike): 
+        data_lines (list): List of MarkYaml document files
 
     """
-    def __init__(self, data_path):
+    def __init__(self, data_path=None, data_lines=None):
 
-        with open(data_path) as fh:
-            doc_lines = fh.read().splitlines()
+        if data_lines is None:
+            with open(data_path) as fh:
+                data_lines = fh.read().splitlines()
 
         self.data = {
             'name': 'root',
@@ -38,7 +43,7 @@ class MarkYamlDataLoader:
         self.prev = self.data
         self.block_lines = []
 
-        for line in doc_lines:
+        for line in data_lines:
             self.read_line(line)
 
         # Load content into last element
