@@ -6,9 +6,7 @@ A lightweight Python framework for building subcommand-driven CLI applications.
 
 ### Description
 
-DEClib provides a thin, opinionated scaffold for CLI tools. Rather than prescribing application logic, it wires together the plumbing that every CLI app needs (argument parsing, configuration loading, and logging) and gets out of the way. The framework is built around inheritance: each component (config, CLI router, API layer, logger) is a base class you subclass and extend for your own application.
-
-The result is a consistent, predictable structure across projects without locking you into a heavy framework.
+DEClib provides a thin, opinionated scaffold for CLI tools. Rather than prescribing application logic, it wires together the plumbing that every CLI app needs (argument parsing, configuration loading, and logging) and gets out of the way. The framework is built around inheritance and conventions: each component (config, CLI router, API layer, logger) is a base class intended to be subclassed and extended.
 
 ---
 
@@ -16,16 +14,49 @@ The result is a consistent, predictable structure across projects without lockin
 
 #### `DeclibMain`
 
-The entry point. Instantiate it in your `__main__.py`, passing in your subclasses of the logger, config, and CLI objects. It handles the startup sequence: preprocessing raw CLI arguments to separate config flags from execution arguments, initializing the config and logger, and routing execution to the CLI handler.
+The entry point. Instantiate it in your `__main__.py`, passing your app name and subclasses of the logger, config, and CLI objects. It handles the startup sequence: preprocessing raw CLI arguments to separate config flags from execution arguments, initializing the config and logger, and routing execution to the CLI handler.
 
 ```python
-from declib import DeclibMain, DeclibLogger
+from declib import DeclibMain
 from .cli import ExampleCli
 from .config import ExampleConfig
 
 def main():
-    DeclibMain(DeclibLogger, ExampleConfig, ExampleCli)
+    DeclibMain(
+        name="my-app",
+        Config=ExampleConfig,
+        Cli=ExampleCli
+    )
 ```
+
+All parameters except `name` are keyword arguments with defaults, so you only need to pass the classes you are actually overriding. `Logger`, `Config`, and `Cli` default to the base declib classes if omitted.
+
+##### `extra_parser_args`
+
+`DeclibMain` accepts an `extra_parser_args` dict that registers additional flags with the CLI preprocessor. These flags are parsed out of the raw argument list using `argparse` before execution arguments are passed to your `DeclibCli` router. Their values are made available in `config_args` when your `DeclibConfig` is initialized, making them a clean way to pass config-level overrides at invocation time.
+Each entry follows the same shape as the built-in `--app_dir` and `--config_path` flags:
+
+```python
+DeclibMain(
+    name="my-app",
+    Config=MyConfig,
+    Cli=MyCli,
+    extra_parser_args={
+        'environment': {
+            'aliases': ['-e', 'env'],
+            'type': str,
+            'help': "Target environment (e.g. dev, prod)"
+        },
+        'dry_run': {
+            'aliases': ['--dry', '-n'],
+            'type': bool,
+            'help': "Run without making changes"
+        }
+    }
+)
+```
+Aliases that start with `-` are passed through as-is; aliases without any leading `-` are automatically prefixed with `--`. The parsed values land in `config_args` and are available to your `DeclibConfig` subclass.
+
 
 #### `DeclibCli`
 
@@ -116,8 +147,7 @@ data = MarkYamlDataLoader("data.md").data
 ### Installation
 
 ```bash
-./build.sh
-pip install dist/declib-0.0.1-py3-none-any.whl
+pip install git+https://github.com/dechandler/declib
 ```
 
 Requires Python > 3.8. The only dependency is `pyyaml`.
@@ -141,7 +171,7 @@ my-app/
 #### `__main__.py`
 
 ```python
-from declib import DeclibMain, DeclibLogger
+from declib import DeclibMain
 from .cli import MyCli
 from .config import MyConfig
 from .exceptions import MyException
@@ -151,7 +181,11 @@ log = logging.getLogger("my-app")
 
 def main():
     try:
-        DeclibMain(DeclibLogger, MyConfig, MyCli)
+        DeclibMain(
+            name="my-app",
+            Config=MyConfig,
+            Cli=MyCli
+        )
     except (MyException, KeyboardInterrupt) as e:
         log.error(f"Exiting: {e}")
 ```
@@ -290,9 +324,3 @@ Built-in config keys:
 - `stderr_log_level` - stderr log level (default: `WARNING`)
 
 Config values can also be set via environment variables. The variable names are derived from your app name by uppercasing it and replacing hyphens with underscores - for example, for an app named `my-app`, the config path variable would be `MY_APP_CONFIG_PATH`.
-
----
-
-### Intent
-
-DEClib is designed for developers who want to write clean, maintainable CLI tools without reaching for a heavy framework. It favors explicit subclassing over decorators and convention over magic, keeping the startup flow easy to trace and the components easy to replace. The class-based architecture means each layer (CLI, config, API, logging) can be extended or swapped independently as a project grows.
