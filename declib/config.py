@@ -3,10 +3,12 @@ import json
 import os
 import sys
 
+from collections.abc import MutableMapping
+
 import yaml
 
 
-class DeclibConfig(dict):
+class DeclibConfig(MutableMapping):
 
     def __init__(self,
         name,
@@ -17,6 +19,7 @@ class DeclibConfig(dict):
     ):
 
         super().__init__()
+        self._data = {}
 
         self.name = name
         self.log = log
@@ -52,6 +55,7 @@ class DeclibConfig(dict):
         self._expand_paths()
 
         self.log.configure_loggers(self)
+
 
 
     def _get_config_path(self):
@@ -124,3 +128,21 @@ class DeclibConfig(dict):
 
         for opt in self.path_opts:
             self[opt] = resolve_path(self.get(opt, ''), self['config_dir'])
+
+
+    # Standard dict behavior for mandatory MutableMapping methods
+    def __getitem__(self, key):
+        """Standard dict behavior: raises KeyError if key is missing"""
+        return self._data[key]
+    def __setitem__(self, key, value):
+        """Set or update the new value"""
+        self._data[key] = value
+    def __delitem__(self, key):
+        """Standard dict behavior: raises KeyError if key is missing"""
+        del self._data[key]
+    def __iter__(self):
+        """Iterate over the keys in the internal dictionary"""
+        return iter(self._data)
+    def __len__(self):
+        """Return the current size"""
+        return len(self._data)
