@@ -94,7 +94,7 @@ class DeepAddressableDictlike:
 
         self._deep_set(this_dict[key], dict_path, value)
 
-    def _deep_items(this_dict, parent_dict_path):
+    def _deep_items(self, this_dict, parent_dict_path):
 
         subitems = []
         for key, value in this_dict.items():
