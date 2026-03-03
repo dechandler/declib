@@ -7,6 +7,8 @@ from collections.abc import MutableMapping
 
 import yaml
 
+from .exceptions import ConfigLoadFailure
+
 
 class DeclibConfig(MutableMapping):
 
@@ -87,8 +89,9 @@ class DeclibConfig(MutableMapping):
         except FileNotFoundError:
             pass
         except yaml.scanner.ScannerError:
-            self.log.error(f"File exists at {self['config_path']} but is not YAML parseable, aborting...")
-            sys.exit(1)
+            msg = f"File exists at {self['config_path']} but is not YAML parseable, aborting..."
+            self.log.error(msg)
+            raise ConfigLoadFailure(msg)
         except Exception as e:
             print(e.__class__)
             self.log.debug(' '.join([
